@@ -1,0 +1,23 @@
+[project]
+name = "manaba-collector"
+version = "0.0.0"
+description = """
+manaba から課題・コース情報を収集・正規化し、\
+自動追跡や外部サービスとの連携を可能にするツール。\
+ / \
+Collect and normalize assignment and course information \
+from manaba for automated tracking and integration.\
+"""
+readme = "README.md"
+authors = [
+    { name = "Colk-tech", email = "github@colk.dev" }
+]
+requires-python = ">=3.15"
+dependencies = []
+
+[project.scripts]
+manaba-collector = "manaba_collector:main"
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
