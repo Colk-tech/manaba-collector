@@ -1,0 +1,33 @@
+---
+name: CI on Push
+
+"on":
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    name: Build Debug Image
+    permissions:
+      contents: read
+      packages: write
+
+    uses: ./.github/workflows/template-build-and-push.yml
+    with:
+      build_target: "developer"
+      image_name_base: ${{ github.repository }}
+      image_name_suffix: "-developer"
+      tags: ''
+
+  check:
+    name: Check code inside Container
+    needs: build
+    permissions:
+      contents: read
+      packages: read
+
+    uses: ./.github/workflows/template-python-ci.yml
+    with:
+      image_name_base: ${{ github.repository }}
+    secrets: inherit
