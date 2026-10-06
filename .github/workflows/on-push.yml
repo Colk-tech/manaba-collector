@@ -10,6 +10,7 @@ name: On Push - Build and code check
 permissions:
   contents: read
   packages: write
+  id-token: write
 
 jobs:
   build-tester:

@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: read
       packages: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -55,8 +56,25 @@ jobs:
             "${{ inputs.image }}" \
             uv run ruff format --check .
 
-      - name: Run pytest with coverage in container
+      - name: Run tests
         run: |
+          mkdir -p coverage
+          touch coverage/coverage.xml
+          chmod a+rw coverage/coverage.xml
+          
           docker run --rm \
+            --volume "${{ github.workspace }}/coverage/coverage.xml:/coverage/coverage.xml" \
             "${{ inputs.image }}" \
-            uv run pytest --cov-report=xml
+            uv run pytest \
+              --cov \
+              --cov-branch \
+              --cov-report=xml:/coverage/coverage.xml
+          
+          test -s coverage/coverage.xml
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          files: ./coverage/coverage.xml
+          fail_ci_if_error: true
+          use_oidc: true
