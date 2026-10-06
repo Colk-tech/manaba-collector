@@ -15,7 +15,7 @@ name: Docker Image Build and Push [template]
           Target stage to build
         type: string
         required: false
-        default: "snapshot"
+        default: "tester"
 
       image_name_base:
         description: >
