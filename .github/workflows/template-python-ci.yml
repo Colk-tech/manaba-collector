@@ -34,39 +34,29 @@ jobs:
       - name: Run mypy type checking in container
         run: |
           docker run --rm \
-            -v "${{ github.workspace }}:/app" \
-            -w /app \
             "${{ inputs.image }}" \
             uv run mypy . --strict
 
       - name: Run ty type checking in container
         run: |
           docker run --rm \
-            -v "${{ github.workspace }}:/app" \
-            -w /app \
             "${{ inputs.image }}" \
             uv run ty check .
 
       - name: Run ruff linter in container
         run: |
           docker run --rm \
-            -v "${{ github.workspace }}:/app" \
-            -w /app \
             "${{ inputs.image }}" \
             uv run ruff check .
 
       - name: Run ruff formatter check in container
         run: |
           docker run --rm \
-            -v "${{ github.workspace }}:/app" \
-            -w /app \
             "${{ inputs.image }}" \
             uv run ruff format --check .
 
       - name: Run pytest with coverage in container
         run: |
           docker run --rm \
-            -v "${{ github.workspace }}:/app" \
-            -w /app \
             "${{ inputs.image }}" \
             uv run pytest --cov-report=xml
