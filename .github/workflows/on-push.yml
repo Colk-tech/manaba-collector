@@ -20,8 +20,8 @@ jobs:
       image_name_suffix: "-developer"
       tags: ''
 
-  lint:
-    name: Lint inside Container
+  check:
+    name: Check code inside Container
     needs: build
     permissions:
       contents: read
