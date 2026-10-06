@@ -1,33 +1,26 @@
 ---
-name: CI on Push
+name: On Push - Build and code check
 
 "on":
   push:
     branches:
-      - '**'
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  build:
-    name: Build Debug Image
-    permissions:
-      contents: read
-      packages: write
-
+  build-tester:
     uses: ./.github/workflows/template-build-and-push.yml
     with:
-      build_target: "developer"
-      image_name_base: ${{ github.repository }}
-      image_name_suffix: "-developer"
-      tags: ''
+      image_name_base: colk-tech/manaba-collector
+      image_name_suffix: -tester
+      build_target: tester
 
-  check:
-    name: Check code inside Container
-    needs: build
-    permissions:
-      contents: read
-      packages: read
-
+  python-ci:
+    needs: build-tester
     uses: ./.github/workflows/template-python-ci.yml
     with:
-      image_name_base: ${{ github.repository }}
-    secrets: inherit
+      image: ${{ needs.build-tester.outputs.tags }}
