@@ -5,6 +5,10 @@ name: On Push - Build and code check
   push:
   pull_request:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-tester:
     uses: ./.github/workflows/template-build-and-push.yml
