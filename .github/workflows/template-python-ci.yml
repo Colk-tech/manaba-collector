@@ -32,6 +32,12 @@ jobs:
       - name: Pull test image
         run: docker pull "${{ inputs.image }}"
 
+      - name: Run tach dependency checking in container
+        run: |
+          docker run --rm \
+            "${{ inputs.image }}" \
+            uv run tach check
+
       - name: Run mypy type checking in container
         run: |
           docker run --rm \
