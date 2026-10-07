@@ -1,0 +1,35 @@
+source_roots = ["src"]
+
+[[modules]]
+path = "manaba_collector.domain"
+depends_on = []
+
+[[modules]]
+path = "manaba_collector.application"
+depends_on = [
+  "manaba_collector.domain",
+]
+
+[[modules]]
+path = "manaba_collector.infrastructure"
+depends_on = [
+  "manaba_collector.application",
+  "manaba_collector.domain",
+]
+
+[[modules]]
+path = "manaba_collector.adapters"
+depends_on = [
+  "manaba_collector.application",
+  "manaba_collector.domain",
+  "manaba_collector.infrastructure",
+]
+
+[[modules]]
+path = "manaba_collector.bootstrap"
+depends_on = [
+  "manaba_collector.domain",
+  "manaba_collector.application",
+  "manaba_collector.infrastructure",
+  "manaba_collector.adapters",
+]
