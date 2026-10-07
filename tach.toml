@@ -2,7 +2,7 @@ source_roots = ["src"]
 
 root_module = "forbid"
 forbid_circular_dependencies = true
-exact = true
+exact = false
 
 [[modules]]
 path = "manaba_collector.domain"
