@@ -15,25 +15,9 @@ jobs:
     uses: ./.github/workflows/template-docker-ci.yml
     permissions:
       contents: read
-      packages: write
       id-token: write
-    with:
-      image: ghcr.io/colk-tech/manaba-collector-tester
-      publish_candidates: ${{ github.event_name == 'push' }}
 
   devcontainer-ci:
     uses: ./.github/workflows/template-devcontainer-ci.yml
     permissions:
       contents: read
-
-  publish:
-    if: github.event_name == 'push'
-    needs:
-      - docker-ci
-      - devcontainer-ci
-    uses: ./.github/workflows/template-publish.yml
-    permissions:
-      contents: read
-      packages: write
-    with:
-      image: ghcr.io/colk-tech/manaba-collector-tester
