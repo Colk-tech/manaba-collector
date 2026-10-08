@@ -3,14 +3,6 @@ name: Docker CI [template]
 
 "on":
   workflow_call:
-    inputs:
-      image:
-        required: true
-        type: string
-      publish_candidates:
-        required: false
-        type: boolean
-        default: false
 
 jobs:
   docker-ci:
@@ -30,7 +22,6 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
       id-token: write
 
     steps:
@@ -113,22 +104,3 @@ jobs:
           files: ./coverage/coverage.xml
           fail_ci_if_error: true
           use_oidc: true
-
-      - name: Log in to GHCR
-        if: inputs.publish_candidates
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push verified architecture image
-        if: inputs.publish_candidates
-        env:
-          IMAGE: ${{ inputs.image }}
-          ARCH: ${{ matrix.arch }}
-        run: |
-          tag="${IMAGE}:sha-${GITHUB_SHA}-${ARCH}"
-
-          docker tag manaba-collector:test "$tag"
-          docker push "$tag"
