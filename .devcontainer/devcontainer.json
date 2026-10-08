@@ -1,0 +1,60 @@
+{
+  "name": "manaba-collector",
+  "build": {
+    "dockerfile": "../docker/python/Dockerfile",
+    "context": "..",
+    "target": "devcontainer"
+  },
+  "workspaceFolder": "/opt/app",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/opt/app,type=bind",
+  "remoteUser": "dev",
+  "updateRemoteUserUID": true,
+  "overrideCommand": true,
+  "containerEnv": {
+    "UV_PROJECT_ENVIRONMENT": "/opt/venv",
+    "UV_CACHE_DIR": "/home/dev/.cache/uv",
+    "UV_LINK_MODE": "copy",
+    "UV_SYSTEM_CERTS": "true",
+    "PYTHONUNBUFFERED": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "initializeCommand": [
+    "mkdir",
+    "-p",
+    "${localEnv:HOME}/.config/ca"
+  ],
+  "mounts": [
+    "source=${localEnv:HOME}/.config/ca,target=/mnt/ca,type=bind,readonly"
+  ],
+  "onCreateCommand": "sudo chown -R dev:dev /opt/venv",
+  "waitFor": "postCreateCommand",
+  "postCreateCommand": [
+    "sh",
+    "-ec",
+    "sudo sh .devcontainer/install-extra-ca.sh && uv sync --locked"
+  ],
+  "customizations": {
+    "jetbrains": {
+      "settings": {
+        "Git4Idea:app:Git-Application-Settings.use_credential_helper": true,
+      }
+    },
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "astral-sh.ty",
+        "tamasfe.even-better-toml"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
+        "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false,
+        "editor.formatOnSave": true,
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        }
+      }
+    }
+  }
+}

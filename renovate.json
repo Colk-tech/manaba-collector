@@ -17,6 +17,23 @@
       ],
       "minimumReleaseAge": "3 days",
       "internalChecksFilter": "strict"
+    },
+    {
+      "description": "Track Ubuntu 26.04 APT package versions",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchDatasources": [
+        "deb"
+      ],
+      "matchFileNames": [
+        "docker/python/Dockerfile"
+      ],
+      "registryUrls": [
+        "https://archive.ubuntu.com/ubuntu?suite=resolute&components=main,universe,restricted,multiverse&binaryArch=amd64",
+        "https://archive.ubuntu.com/ubuntu?suite=resolute-updates&components=main,universe,restricted,multiverse&binaryArch=amd64",
+        "https://security.ubuntu.com/ubuntu?suite=resolute-security&components=main,universe,restricted,multiverse&binaryArch=amd64"
+      ]
     }
   ]
 }
