@@ -192,7 +192,6 @@ ENV PATH="${VENV_DIR}/bin:$PATH"
 
 WORKDIR ${APP_DIR}
 
-
 # =================================================================
 # Dev Container: interactive development with a non-root user
 FROM developer AS devcontainer
@@ -201,6 +200,7 @@ FROM developer AS devcontainer
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates=20260601~26.04.1 \
+        curl=8.18.0-1ubuntu2.7 \
         git=1:2.53.0-1ubuntu1 \
         openssh-client=1:10.2p1-2ubuntu3.6 \
         sudo=1.9.17p2-1ubuntu3.2 \
