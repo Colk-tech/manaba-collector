@@ -26,6 +26,7 @@
   "mounts": [
     "source=${localEnv:HOME}/.config/ca,target=/mnt/ca,type=bind,readonly"
   ],
+  "waitFor": "postCreateCommand",
   "postCreateCommand": [
     "sh",
     "-ec",
