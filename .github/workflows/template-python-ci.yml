@@ -1,4 +1,3 @@
----
 name: Python CI [template]
 
 "on":
@@ -9,8 +8,46 @@ name: Python CI [template]
         type: string
         required: true
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
-  python-ci:
+  checks:
+    name: Check / ${{ matrix.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: tach
+            command: uv run tach check
+          - name: ruff-lint
+            command: uv run ruff check .
+          - name: ruff-format
+            command: uv run ruff format --check .
+          - name: ty
+            command: uv run ty check .
+          - name: mypy
+            command: uv run mypy . --strict
+
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run ${{ matrix.name }}
+        run: |
+          docker run --rm \
+            "${{ inputs.image }}" \
+            ${{ matrix.command }}
+
+  tests:
+    name: Tests / pytest
     runs-on: ubuntu-latest
 
     permissions:
@@ -22,52 +59,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Log in to the GitHub Container Registry
+      - name: Log in to GHCR
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull test image
-        run: docker pull "${{ inputs.image }}"
-
-      - name: Run tach dependency checking in container
-        run: |
-          docker run --rm \
-            "${{ inputs.image }}" \
-            uv run tach check
-
-      - name: Run mypy type checking in container
-        run: |
-          docker run --rm \
-            "${{ inputs.image }}" \
-            uv run mypy . --strict
-
-      - name: Run ty type checking in container
-        run: |
-          docker run --rm \
-            "${{ inputs.image }}" \
-            uv run ty check .
-
-      - name: Run ruff linter in container
-        run: |
-          docker run --rm \
-            "${{ inputs.image }}" \
-            uv run ruff check .
-
-      - name: Run ruff formatter check in container
-        run: |
-          docker run --rm \
-            "${{ inputs.image }}" \
-            uv run ruff format --check .
-
       - name: Run tests
         run: |
           mkdir -p coverage
           touch coverage/coverage.xml
           chmod a+rw coverage/coverage.xml
-          
+
           docker run --rm \
             --volume "${{ github.workspace }}/coverage/coverage.xml:/coverage/coverage.xml" \
             "${{ inputs.image }}" \
@@ -75,10 +79,10 @@ jobs:
               --cov \
               --cov-branch \
               --cov-report=xml:/coverage/coverage.xml
-          
+
           test -s coverage/coverage.xml
 
-      - name: Upload coverage reports to Codecov
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
           files: ./coverage/coverage.xml
