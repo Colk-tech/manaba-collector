@@ -33,6 +33,11 @@
     "sudo sh .devcontainer/install-extra-ca.sh && uv sync --locked"
   ],
   "customizations": {
+    "jetbrains": {
+      "settings": {
+        "Git4Idea:app:Git-Application-Settings.use_credential_helper": true,
+      }
+    },
     "vscode": {
       "extensions": [
         "ms-python.python",
