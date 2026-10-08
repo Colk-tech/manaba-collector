@@ -1,5 +1,5 @@
 ---
-name: On Push - Build and code check
+name: On Push - Build and Code Check
 
 "on":
   push:
@@ -9,25 +9,31 @@ name: On Push - Build and code check
 
 permissions:
   contents: read
-  packages: write
-  id-token: write
 
 jobs:
-  build-tester:
-    uses: ./.github/workflows/template-build-and-push.yml
+  docker-ci:
+    uses: ./.github/workflows/template-docker-ci.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     with:
-      image_name_base: colk-tech/manaba-collector
-      image_name_suffix: -tester
-      build_target: tester
+      image: ghcr.io/colk-tech/manaba-collector-tester
+      publish_candidates: ${{ github.event_name == 'push' }}
 
-  devcontainer:
-    name: Dev Container
+  devcontainer-ci:
     uses: ./.github/workflows/template-devcontainer-ci.yml
     permissions:
       contents: read
 
-  python-ci:
-    needs: build-tester
-    uses: ./.github/workflows/template-python-ci.yml
+  publish:
+    if: github.event_name == 'push'
+    needs:
+      - docker-ci
+      - devcontainer-ci
+    uses: ./.github/workflows/template-publish.yml
+    permissions:
+      contents: read
+      packages: write
     with:
-      image: ${{ needs.build-tester.outputs.tags }}
+      image: ghcr.io/colk-tech/manaba-collector-tester
