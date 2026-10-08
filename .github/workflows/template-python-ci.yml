@@ -63,20 +63,23 @@ jobs:
             uv run ruff format --check .
 
       - name: Run tests
+        env:
+          IMAGE: ${{ inputs.image }}
+          COVERAGE_DIR: ${{ github.workspace }}/coverage
         run: |
-          mkdir -p coverage
-          touch coverage/coverage.xml
-          chmod a+rw coverage/coverage.xml
-          
+          mkdir -p "$COVERAGE_DIR"
+          chmod a+rwx "$COVERAGE_DIR"
+
           docker run --rm \
-            --volume "${{ github.workspace }}/coverage/coverage.xml:/coverage/coverage.xml" \
-            "${{ inputs.image }}" \
+            --mount \
+              "type=bind,source=$COVERAGE_DIR,target=/coverage" \
+            "$IMAGE" \
             uv run pytest \
               --cov \
               --cov-branch \
               --cov-report=xml:/coverage/coverage.xml
-          
-          test -s coverage/coverage.xml
+
+          test -s "$COVERAGE_DIR/coverage.xml"
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v7
