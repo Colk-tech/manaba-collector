@@ -1,0 +1,106 @@
+---
+name: Docker CI [template]
+
+"on":
+  workflow_call:
+
+jobs:
+  docker-ci:
+    name: Docker / ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+            platform: linux/amd64
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build tester image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/python/Dockerfile
+          target: tester
+          platforms: ${{ matrix.platform }}
+          load: true
+          push: false
+          tags: manaba-collector:test
+          cache-from: type=gha,scope=tester-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=tester-${{ matrix.arch }}
+
+      - name: Verify image architecture
+        env:
+          EXPECTED: ${{ matrix.arch }}
+        run: |
+          actual="$(docker image inspect \
+            manaba-collector:test \
+            --format '{{.Architecture}}')"
+
+          test "$actual" = "$EXPECTED"
+
+      - name: Smoke test
+        run: |
+          docker run --rm \
+            manaba-collector:test \
+            uv run --frozen python -c \
+              "import manaba_collector"
+
+      - name: Run static checks
+        if: matrix.arch == 'amd64'
+        run: |
+          docker run --rm manaba-collector:test \
+            uv run --frozen tach check
+
+          docker run --rm manaba-collector:test \
+            uv run --frozen ruff format --check .
+
+          docker run --rm manaba-collector:test \
+            uv run --frozen ruff check .
+
+          docker run --rm manaba-collector:test \
+            uv run --frozen ty check .
+
+          docker run --rm manaba-collector:test \
+            uv run --frozen mypy . --strict
+
+      - name: Run pytest
+        env:
+          COVERAGE_DIR: ${{ github.workspace }}/coverage
+        run: |
+          mkdir -p "$COVERAGE_DIR"
+          chmod a+rwx "$COVERAGE_DIR"
+
+          docker run --rm \
+            --mount \
+              "type=bind,source=$COVERAGE_DIR,target=/coverage" \
+            manaba-collector:test \
+            uv run --frozen pytest \
+              --cov \
+              --cov-branch \
+              --cov-report=xml:/coverage/coverage.xml
+
+          test -s "$COVERAGE_DIR/coverage.xml"
+
+      - name: Upload coverage
+        if: matrix.arch == 'amd64'
+        uses: codecov/codecov-action@v7
+        with:
+          files: ./coverage/coverage.xml
+          fail_ci_if_error: true
+          use_oidc: true

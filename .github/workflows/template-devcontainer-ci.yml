@@ -6,8 +6,17 @@ name: Dev Container CI [template]
 
 jobs:
   devcontainer-ci:
-    name: Build and smoke test
-    runs-on: ubuntu-latest
+    name: Dev Container / ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
 
     permissions:
       contents: read
@@ -16,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -36,6 +45,9 @@ jobs:
         run: |
           devcontainer exec --workspace-folder . \
             sh -eu -c '
+              echo "=== Architecture ==="
+              uname -m
+
               echo "=== User ==="
               id
               test "$(id -u)" -ne 0
@@ -46,14 +58,16 @@ jobs:
               test -f uv.lock
 
               echo "=== Python ==="
-              uv run python --version
-              uv run python -c "
-          import sys
-          assert sys.prefix == \"/opt/venv\"
-          "
+              uv run --frozen python --version
+              uv run --frozen python -c \
+                "import sys; assert sys.prefix == \"/opt/venv\""
 
               echo "=== Dependencies ==="
               uv sync --check
+
+              echo "=== Package ==="
+              uv run --frozen python -c \
+                "import manaba_collector"
 
               echo "=== Smoke test passed ==="
             '
