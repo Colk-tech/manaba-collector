@@ -203,7 +203,7 @@ RUN apt-get update \
         ca-certificates=20260601~26.04.1 \
         git=1:2.53.0-1ubuntu1 \
         openssh-client=1:10.2p1-2ubuntu3.6 \
-        sudo=1.9.17p2-1ubuntu3.1 \
+        sudo=1.9.17p2-1ubuntu3.2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create an unprivileged development user
