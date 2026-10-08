@@ -20,6 +20,12 @@ jobs:
       image_name_suffix: -tester
       build_target: tester
 
+  devcontainer:
+    name: Dev Container
+    uses: ./.github/workflows/template-devcontainer-ci.yml
+    permissions:
+      contents: read
+
   python-ci:
     needs: build-tester
     uses: ./.github/workflows/template-python-ci.yml
