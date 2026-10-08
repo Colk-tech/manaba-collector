@@ -191,3 +191,36 @@ COPY --chown=nonroot:nonroot ./ ${APP_DIR}
 ENV PATH="${VENV_DIR}/bin:$PATH"
 
 WORKDIR ${APP_DIR}
+
+
+# =================================================================
+# Dev Container: interactive development with a non-root user
+FROM developer AS devcontainer
+
+# Development-only utilities
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates=20260601~26.04.1 \
+        git=1:2.53.0-1ubuntu1 \
+        openssh-client=1:10.2p1-2ubuntu3.6 \
+        sudo=1.9.17p2-1ubuntu3.1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create an unprivileged development user
+RUN useradd \
+        --uid 10001 \
+        --user-group \
+        --create-home \
+        --shell /bin/bash \
+        dev \
+    && echo "dev ALL=(root) NOPASSWD:ALL" \
+        > /etc/sudoers.d/dev \
+    && chmod 0440 /etc/sudoers.d/dev \
+    && chown -R dev:dev "${VENV_DIR}"
+
+ENV UV_CACHE_DIR=/home/dev/.cache/uv \
+    UV_LINK_MODE=copy
+
+USER 10001:10001
+
+CMD ["/bin/sleep", "infinity"]
