@@ -14,10 +14,23 @@
     "UV_PROJECT_ENVIRONMENT": "/opt/venv",
     "UV_CACHE_DIR": "/home/dev/.cache/uv",
     "UV_LINK_MODE": "copy",
+    "UV_SYSTEM_CERTS": "true",
     "PYTHONUNBUFFERED": "1",
     "PYTHONDONTWRITEBYTECODE": "1"
   },
-  "postCreateCommand": "uv sync --locked",
+  "initializeCommand": [
+    "mkdir",
+    "-p",
+    "${localEnv:HOME}/.config/ca"
+  ],
+  "mounts": [
+    "source=${localEnv:HOME}/.config/ca,target=/mnt/ca,type=bind,readonly"
+  ],
+  "postCreateCommand": [
+    "sh",
+    "-ec",
+    "sudo sh .devcontainer/install-extra-ca.sh && uv sync --locked"
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
