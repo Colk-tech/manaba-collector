@@ -26,6 +26,7 @@
   "mounts": [
     "source=${localEnv:HOME}/.config/ca,target=/mnt/ca,type=bind,readonly"
   ],
+  "onCreateCommand": "sudo chown -R dev:dev /opt/venv",
   "waitFor": "postCreateCommand",
   "postCreateCommand": [
     "sh",
